@@ -3,11 +3,10 @@
     (function() {
         var targetId = "{{ 'asciinema-player-' ~ match_id }}";
         
-        var subscription = document$.subscribe(function() {
+        function initPlayer() {
             var element = document.getElementById(targetId);
             
             if (element && !element.hasAttribute('data-mkap-initialized')) {
-                
                 element.setAttribute('data-mkap-initialized', 'true');
                 
                 AsciinemaPlayer.create("{{ file_path }}", element, {
@@ -27,6 +26,20 @@
                     terminalLineHeight: {{ terminal_line_height }},
                 });
             }
-        });
+        }
+
+        // 1. Handle MkDocs Material instant loading/navigation
+        if (typeof document$ !== "undefined") {
+            document$.subscribe(function() {
+                initPlayer();
+            });
+        } 
+        
+        // 2. Fallback for standard page load (DOM Ready)
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", initPlayer);
+        } else {
+            initPlayer();
+        }
     })();
 </script>
